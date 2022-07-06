@@ -49,10 +49,13 @@ class SpectrumToSpectrogram(object):
         # Extract spectrogram of last (self.spectrogram_period) seconds
         time_now = rospy.Time.now()
         for i, stamp in enumerate(self.spectrum_stamp):
-            if (time_now - stamp).to_sec() < self.spectrogram_period:
+            diff = (time_now - stamp).to_sec()
+            if diff > 0.0 and diff < self.spectrogram_period:
                 self.spectrogram = self.spectrogram[i:]
                 self.spectrum_stamp = self.spectrum_stamp[i:]
-                break
+                return
+        self.spectrogram = self.spectrogram[self.spectrogram.shape[0]:]
+        self.spectrum_stamp = []
 
     def timer_cb(self, timer):
         if self.spectrogram.shape[0] == 0:
